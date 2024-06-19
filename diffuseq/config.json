@@ -21,7 +21,7 @@
   "dataset": "dataset-name",
   "data_split_num": 0,
   "checkpoint_path": "checkpoint-path",
-  "seq_len": 128,
+  "seq_len": 1024,
   "hidden_t_dim": 128,
   "hidden_dim": 128,
   "dropout": 0.1,

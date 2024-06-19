@@ -41,6 +41,8 @@ def load_data_text(
     if "pretrain" in data_args.notes:
         print("#### Load Pretrain Data, fold=", data_args.data_split_num)
         training_data = get_corpus_pretrain(data_args, seq_len, split=split, loaded_vocab=loaded_vocab, split_num=data_args.data_split_num)
+    elif data_args.hf_dataset:
+        training_data = get_corpus_huggingface(data_args, seq_len, split=split, loaded_vocab=loaded_vocab)
     else:
         training_data = get_corpus(data_args, seq_len, split=split, loaded_vocab=loaded_vocab)
 
@@ -247,6 +249,30 @@ def get_corpus(data_args, seq_len, split='train', loaded_vocab=None):
 
     train_dataset = helper_tokenize(sentence_lst, vocab_dict, seq_len)
     return train_dataset
+
+def get_corpus_huggingface(data_args, seq_len, split='train', loaded_vocab=None):
+    # load datesets using huggingface datasets api
+    print('#'*30, '\nLoading huggingface dataset {} of version {}...'.format(data_args.hf_dataset, data_args.hf_version))
+    
+    sentence_lst = {'src': [], 'trg': []}
+    
+    print(f'### Loading form the {str(split).upper()} set...')
+    if data_args.hf_dataset == 'abisee/cnn_dailymail':
+        ds = datasets.load_dataset(data_args.hf_dataset, data_args.hf_version, split=split)
+    else:
+        ds = datasets.load_dataset(data_args.hf_dataset, split=split)
+    
+    for row in ds:
+        sentence_lst['src'].append(row['article'].strip())
+        sentence_lst['trg'].append(row['highlights'].strip())
+    
+    print('### Data samples...\n', sentence_lst['src'][:2], sentence_lst['trg'][:2])
+    
+    vocab_dict = loaded_vocab
+    
+    train_dataset = helper_tokenize(sentence_lst, vocab_dict, seq_len)
+    return train_dataset
+    
 
 def get_corpus_pretrain(data_args, seq_len, split='train', loaded_vocab=None, split_num=0):
 
