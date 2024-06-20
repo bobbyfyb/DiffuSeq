@@ -8,13 +8,13 @@ CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch --nproc_per_node=2 -
 --hidden_dim 128 \
 --bsz 425 \
 --microbatch 425 \
---dataset QQP \
---data_dir /data2/fyb/QQP \
+--hf_dataset cnn_dailymail \
+--hf_version 3.0.0 \
 --learned_mean_embed True \
 --denoise True \
 --vocab bert \
---seq_len 128 \
+--seq_len 1024 \
 --use_fp16 \
 --denoise_rate 0.5 \
 --schedule_sampler lossaware \
---notes learned_mask_fp16_denoise_0.5_reproduce
+--notes "summarization" \

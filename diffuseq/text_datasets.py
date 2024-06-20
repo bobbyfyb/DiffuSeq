@@ -41,12 +41,15 @@ def load_data_text(
     if "pretrain" in data_args.notes:
         print("#### Load Pretrain Data, fold=", data_args.data_split_num)
         training_data = get_corpus_pretrain(data_args, seq_len, split=split, loaded_vocab=loaded_vocab, split_num=data_args.data_split_num)
+    elif data_args.hf_dataset:
+        training_data = get_corpus_huggingface(data_args, seq_len, split=split, loaded_vocab=loaded_vocab)
     else:
         training_data = get_corpus(data_args, seq_len, split=split, loaded_vocab=loaded_vocab)
 
     dataset = TextDataset(
         training_data,
         data_args,
+        loaded_vocab=loaded_vocab,
         model_emb=model_emb
     )
 
@@ -248,6 +251,30 @@ def get_corpus(data_args, seq_len, split='train', loaded_vocab=None):
     train_dataset = helper_tokenize(sentence_lst, vocab_dict, seq_len)
     return train_dataset
 
+def get_corpus_huggingface(data_args, seq_len, split='train', loaded_vocab=None):
+    # load datesets using huggingface datasets api
+    print('#'*30, '\nLoading huggingface dataset {} of version {}...'.format(data_args.hf_dataset, data_args.hf_version))
+    
+    sentence_lst = {'src': [], 'trg': []}
+    
+    print(f'### Loading form the {str(split).upper()} set...')
+    if data_args.hf_dataset == 'cnn_dailymail':
+        ds = datasets.load_dataset(f"abisee/{data_args.hf_dataset}", data_args.hf_version, split=split)
+    else:
+        ds = datasets.load_dataset(data_args.hf_dataset, split=split)
+    
+    for row in ds:
+        sentence_lst['src'].append(row['article'].strip())
+        sentence_lst['trg'].append(row['highlights'].strip())
+    
+    print('### Data samples...\n', sentence_lst['src'][:2], sentence_lst['trg'][:2])
+    
+    vocab_dict = loaded_vocab
+    
+    train_dataset = helper_tokenize(sentence_lst, vocab_dict, seq_len)
+    return train_dataset
+    
+
 def get_corpus_pretrain(data_args, seq_len, split='train', loaded_vocab=None, split_num=0):
 
     print('#'*30, '\nLoading dataset {} from {}...'.format(data_args.dataset, data_args.data_dir))
@@ -274,11 +301,12 @@ def get_corpus_pretrain(data_args, seq_len, split='train', loaded_vocab=None, sp
     return train_dataset
 
 class TextDataset(Dataset):
-    def __init__(self, text_datasets, data_args, model_emb=None):
+    def __init__(self, text_datasets, data_args,loaded_vocab=None, model_emb=None):
         super().__init__()
         self.text_datasets = text_datasets
         self.length = len(self.text_datasets['train'])
         self.data_args = data_args
+        self.loaded_vocab = loaded_vocab
         self.model_emb = model_emb
 
     def __len__(self):
@@ -288,8 +316,8 @@ class TextDataset(Dataset):
         with torch.no_grad():
 
             input_ids = self.text_datasets['train'][idx]['input_ids']
+            input_ids = [i if i is not None else self.loaded_vocab.unk_token_id for i in input_ids]
             hidden_state = self.model_emb(torch.tensor(input_ids))
-
             # obtain the input vectors, only used when word embedding is fixed (not trained end-to-end)
             arr = np.array(hidden_state, dtype=np.float32)
 

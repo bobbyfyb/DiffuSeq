@@ -4,7 +4,6 @@ Train a diffusion model on images.
 
 import argparse
 import json, torch, os
-import time
 import numpy as np
 from diffuseq.utils import dist_util, logger
 from diffuseq.text_datasets import load_data_text
@@ -22,8 +21,8 @@ from transformers import set_seed
 import wandb
 
 ### custom your wandb setting here ###
-os.environ["WANDB_API_KEY"] = "6eaf6c1c44882a05a56c5e547cac555537907b96"
-# os.environ["WANDB_MODE"] = "offline"
+# os.environ["WANDB_API_KEY"] = ""
+os.environ["WANDB_MODE"] = "offline"
 
 def create_argparser():
     defaults = dict()
@@ -91,8 +90,6 @@ def main():
         wandb.config.update(args.__dict__, allow_val_change=True)
 
     logger.log("### Training...")
-    
-    start_time = time.time()
 
     TrainLoop(
         model=model,
@@ -115,10 +112,6 @@ def main():
         eval_data=data_valid,
         eval_interval=args.eval_interval
     ).run_loop()
-    
-    end_time = time.time()
-    
-    logger.log(f"### Training took {end_time - start_time:.0f} seconds")
 
 if __name__ == "__main__":
     main()
