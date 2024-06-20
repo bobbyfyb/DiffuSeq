@@ -23,6 +23,9 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='', help='name of training dataset')
     parser.add_argument('--data_dir', type=str, default='', help='path to training dataset')
     parser.add_argument('--data_split_num', type=int, default=0, help='fold number of training dataset')
+    
+    parser.add_argument('--hf_dataset', type=str, default='cnn_dailymail', help='name of huggingface dataset')
+    parser.add_argument('--hf_version', type=str, default='3.0.0', help='version of huggingface dataset')
 
     parser.add_argument('--noise_schedule', type=str, default='cosine', choices=['linear', 'cosine', 'sqrt', 'trunc_cos', 'trunc_lin', 'pw_lin', 'warmup-decay'], help='the distribution of noises')
     parser.add_argument('--diff_steps', type=int, default=4000, help='diffusion steps')
@@ -32,7 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--reg_rate', default=0.0, type=float, help='regularization rate of learned mean embed for gaussian; default is zero')
     parser.add_argument('--denoise_rate', default=0.2, type=float, help='max denoise rate of [MASK]')
 
-    parser.add_argument('--seq_len', type=int, default=128, help='max len of input sequence')
+    parser.add_argument('--seq_len', type=int, default=1024, help='max len of input sequence')
     parser.add_argument('--hidden_t_dim', type=int, default=128, help='hidden size of time embedding')
     parser.add_argument('--hidden_dim', type=int, default=128, help='hidden size of word embedding')
     parser.add_argument('--learning_steps', type=int, default=40000, help='total steps of learning')
@@ -44,14 +47,18 @@ if __name__ == '__main__':
     parser.add_argument('--microbatch', type=int, default=64, help='microbatch size')
     parser.add_argument('--seed', type=int, default=101, help='random seed')
 
-    parser.add_argument('--config_name', type=str, default='bert-base-uncased', help='config of pre-trained models')
+    parser.add_argument('--config_name', type=str, default='google/long-t5-local-base', help='config of pre-trained models')
     parser.add_argument('--vocab', type=str, default='bert', help='use bert vocab or load external vocab dict if given as path')
-    parser.add_argument('--use_plm_init', type=str, default='no', choices=['no', 'bert'], help='load init parameter from the pre-trained lm')
+    parser.add_argument('--use_plm_init', type=str, default='no', choices=['no', 'longt5'], help='load init parameter from the pre-trained lm')
 
     parser.add_argument('--notes', type=str, default='-', help='as training notes or specifical args')
     parser.add_argument('--app', type=str, default='', help='other input args')
     
     args = parser.parse_args()
+    
+    if args.hf_dataset:
+        args.dataset = args.hf_dataset
+        args.data_dir = 'datasets/hf_datasets'
 
     # set working dir to the upper folder
     abspath = os.path.abspath(sys.argv[0])
@@ -82,6 +89,7 @@ if __name__ == '__main__':
                   f"python train.py   " \
                   f"--checkpoint_path {Model_FILE} " \
                   f"--dataset {args.dataset} --data_dir {args.data_dir} --data_split_num {args.data_split_num} --vocab {args.vocab} --use_plm_init {args.use_plm_init} " \
+                  f"--hf_dataset {args.hf_dataset} --hf_version {args.hf_version} " \
                   f"--lr {args.lr} --use_fp16 {args.use_fp16} " \
                   f"--batch_size {args.bsz} --microbatch {args.microbatch} " \
                   f"--diffusion_steps {args.diff_steps} " \
