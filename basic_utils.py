@@ -16,14 +16,7 @@ class myTokenizer():
     ### You can custome your own tokenizer here. ###
     ################################################
     def __init__(self, args):
-        if args.vocab == 'bert':
-            tokenizer = AutoTokenizer.from_pretrained(args.config_name)
-            self.tokenizer = tokenizer
-            self.sep_token_id = tokenizer.sep_token_id
-            self.pad_token_id = tokenizer.pad_token_id
-            # save
-            tokenizer.save_pretrained(args.checkpoint_path)
-        elif args.vocab == "google/long-t5-local-base":
+        if args.vocab == 'bert' or args.vocab == 'google/long-t5-local-base':
             tokenizer = AutoTokenizer.from_pretrained(args.config_name)
             self.tokenizer = tokenizer
             self.sep_token_id = tokenizer.sep_token_id

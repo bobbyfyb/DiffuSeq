@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, default='', help='path to training dataset')
     parser.add_argument('--data_split_num', type=int, default=0, help='fold number of training dataset')
     
-    parser.add_argument('--hf_dataset', type=str, default='abisee/cnn_dailymail', help='name of huggingface dataset')
+    parser.add_argument('--hf_dataset', type=str, default='cnn_dailymail', help='name of huggingface dataset')
     parser.add_argument('--hf_version', type=str, default='3.0.0', help='version of huggingface dataset')
 
     parser.add_argument('--noise_schedule', type=str, default='cosine', choices=['linear', 'cosine', 'sqrt', 'trunc_cos', 'trunc_lin', 'pw_lin', 'warmup-decay'], help='the distribution of noises')
@@ -55,6 +55,10 @@ if __name__ == '__main__':
     parser.add_argument('--app', type=str, default='', help='other input args')
     
     args = parser.parse_args()
+    
+    if args.hf_dataset:
+        args.dataset = args.hf_dataset
+        args.data_dir = 'datasets/hf_datasets'
 
     # set working dir to the upper folder
     abspath = os.path.abspath(sys.argv[0])
@@ -85,7 +89,7 @@ if __name__ == '__main__':
                   f"python train.py   " \
                   f"--checkpoint_path {Model_FILE} " \
                   f"--dataset {args.dataset} --data_dir {args.data_dir} --data_split_num {args.data_split_num} --vocab {args.vocab} --use_plm_init {args.use_plm_init} " \
-                  f"--hf_dataset {args.hf_dataset} --hf_version {args.hf_version}" \
+                  f"--hf_dataset {args.hf_dataset} --hf_version {args.hf_version} " \
                   f"--lr {args.lr} --use_fp16 {args.use_fp16} " \
                   f"--batch_size {args.bsz} --microbatch {args.microbatch} " \
                   f"--diffusion_steps {args.diff_steps} " \

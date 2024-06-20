@@ -19,6 +19,8 @@
   "notes": "folder-notes",
   "data_dir": "data-dir",
   "dataset": "dataset-name",
+  "hf_dataset": "huggingface-dataset-name",
+  "hf_version": "huggingface-dataset-version",
   "data_split_num": 0,
   "checkpoint_path": "checkpoint-path",
   "seq_len": 1024,
