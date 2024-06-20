@@ -22,12 +22,11 @@ if __name__ == '__main__':
     parser.add_argument('--pattern', type=str, default='ema', help='training pattern')
     
     args = parser.parse_args()
-    
+
     # set working dir to the upper folder
     abspath = os.path.abspath(sys.argv[0])
     dname = os.path.dirname(abspath)
     dname = os.path.dirname(dname)
-        
     os.chdir(dname)
 
     output_lst = []
